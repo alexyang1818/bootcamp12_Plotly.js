@@ -2,44 +2,42 @@ function init() {
     var selector = d3.select('#selDataset');
 
     d3.json('samples.json').then((data) => {
-        console.log(data);
+        
         var sampleNames = data.names;
+
         sampleNames.forEach((sample) => {
             selector
                 .append('option')
                 .text(sample)
                 .property('value', sample);
         });
-})};
+
+    buildMetadata(sampleNames[0]);
+    })
+
+};
 
 init();
 
-d3.selectAll('#dropdownMenu').on('change', updatePlotly);
+function optionChanged(newSample) {
+    buildMetadata(newSample);
+    buildCharts(newSample);
+}
 
-function updatePlotly() {
-    var dropdownMenu = d3.select('#dropdownMenu');
-    var dataset = dropdownMenu.property('value');
+function buildMetadata(sample) {
+    d3.json('samples.json').then((data) => {
+        var metadata = data.metadata;
+        var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
+        var result = resultArray[0];
+        var PANEL = d3.select('#sample-metadata');
 
-    var xData = [1, 2, 3, 4, 5];
-    var yData = [];
+        PANEL.html('');
+        Object.entries(result).forEach(entry => {
+            PANEL.append('h6').text(`${entry[0].toUpperCase()}: ${entry[1]}`);
+        })
+    })
+}
 
-    if (dataset === 'dataset1') {
-        yData = [1, 2, 4, 8, 16];
-    };
+function buildCharts(sample) {
 
-    if (dataset === 'dataset2') {
-        yData = [1, 10, 100, 1000, 10000];
-    };
-
-    var trace = {
-        x: [xData],
-        y: [yData],
-    };
-
-    // var data = [trace]
-    
-    // The Plotly.restyle() method is used to re-render 
-    // the page on the browser. This method is more efficient 
-    // than calling the Plotly.newPlot() method,
-    Plotly.restyle('plot', trace);
-};
+}
